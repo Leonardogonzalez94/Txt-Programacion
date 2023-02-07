@@ -1,0 +1,382 @@
+<script type="text/jsx">
+  
+  const GenerarReportes = () => {
+    useEffect(() => {
+      google.script.run.withSuccessHandler(() => {}).generarPlantilla()
+    }, [])
+
+    const [state, setState] = useState({
+      nombreSocio: "",
+      campo: "",
+      tipoReporte: "",
+      fecha: "",
+      generadorReporte: "",
+      revisor: "",
+      aprobacion: "",
+      fechaEntrega: "",
+      fechaMes: ""
+    })
+    const [select, setSelect] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [redirect, setRedirect] = useState(false)
+
+    const handleChange = (e) => {
+      const {name, value} = e.target
+      if(name === "nombreSocio"){
+        handleSearchSocio(value)
+      }
+      setState({
+        ...state,
+        [name]: value
+      })
+    }
+
+    const {
+      nombreSocio, 
+      campo, 
+      tipoReporte,
+      fecha,
+      generadorReporte,
+      revisor,
+      aprobacion,
+      fechaEntrega,
+      fechaMes } = state
+
+    const handleSearchSocio = (nombreSocio) => {
+      setSelect([])
+      setLoading(true)
+      google.script.run.withSuccessHandler(saveSocios).buscarSocios(nombreSocio)
+    }
+    const saveSocios = (data) => {
+      setLoading(false)
+      setSelect(data)
+      console.log(data)
+    }
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+      console.log(state)
+      setLoading(true)
+      google.script.run
+                      .withSuccessHandler(handleGetLinks)
+                      .withFailureHandler(showError)
+                      .saveLinksPlantillas(nombreSocio, campo, tipoReporte);
+    }
+
+    const handleGetLinks = (resp) => {
+      if(!resp) return
+      const finalData = {...state, forms: resp}
+      google.script.run.withSuccessHandler(redirectToReporte).saveDataSpreedsheet(finalData)
+    }
+
+    const redirectToReporte = () => {
+      setLoading(false)
+      setRedirect(true)
+    }
+
+    return(
+      <div>
+        <section className="generar">
+          <h2>Formulario para la generación de reportes a socios</h2>
+          <p>A continuación se solicitara datos para generar el reporte</p>
+          <form autoComplete="off">
+            <div className=" mb-3">
+              <div className="formularios">
+                <label className="form-label">Nombre del Socio:</label>
+                <select className="form-select" value={nombreSocio} onChange={handleChange} name="nombreSocio" required>
+                  <option value="">Seleccione socio</option>
+                  <option value="PERENCO">PERENCO</option>
+                  <option value="ONG">ONG</option>
+                  <option value="PETRODORADO">PETRODORADO</option>
+                  <option value="TALISMAN">TALISMAN</option>
+                  <option value="CEPSA">CEPSA</option>
+                  <option value="GREEN POWER">GREEN POWER</option>
+                  <option value="MARAL">MARAL</option>
+                  <option value="GEOPARK">GEOPARK</option>
+                  <option value="BRICCON">BRICCON</option>
+                  <option value="HOCOL">HOCOL</option>
+                  <option value="PETROBRAS">PETROBRAS</option>
+                  <option value="PETROSUD">PETROSUD</option>
+                  <option value="PAREX">PAREX</option>
+                </select>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Contrato/Campo:</label>
+              <select className="form-select" value={campo} onChange={handleChange} name="campo" required id="campoSelect">
+                <option value="">Seleccione contrato:</option>
+                {
+                  (select.length > 0) && (
+                    select.map((item, i) => (
+                      <option value={item.campo} onChange={handleChange} name={item.campo} key={i.toString()}>
+                        {item.campo}
+                      </option>
+                    ))
+                  )
+                }
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Tipo de reporte:</label>
+              <select className="form-select" value={tipoReporte} onChange={handleChange} name="tipoReporte" required id="reporteId">
+                <option value="">Seleccione reporte: </option>
+                {
+                  (select.length > 0) && (
+                    <option value={select[0].reporte} onChange={handleChange} name={select[0].reporte}>
+                      {select[0].reporte}
+                    </option>
+                  )
+                }
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form label">Año/Mes</label>
+              <input type="month" className="form-control imputs-generar" value={fechaMes} onChange={handleChange} required name="fechaMes"/>
+            </div>
+            <div className="mb-3">
+              <label className="form label">Fecha de generación</label>
+              <input type="date" className="form-control imputs-generar" value={fecha} onChange={handleChange} required name="fecha"/>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Generador del reporte:</label>
+              <select className="form-select" value={generadorReporte} onChange={handleChange} name="generadorReporte" required>
+                <option value="">Seleccione generador</option>
+                <option value="Jenny Pachon S.">Jenny Pachon S.</option>
+                <option value="Leidy Dayan Peña">Leidy Dayan Peña</option>
+                <option value="Leidy Gonzalez">Leidy Gonzalez</option>
+                <option value="Martha Moreno">Martha Moreno</option>
+                <option value="Erika Baquero">Erika Baquero</option>
+                <option value="Wendy Vega">Wendy Vega</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Revisión del reporte:</label>
+              <select className="form-select" value={revisor} onChange={handleChange} name="revisor" required>
+                <option value="">Seleccione revisor </option>
+                <option value="Nidia Torres">Nidia Torres</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Aprobación del reporte:</label>
+              <select className="form-select" value={aprobacion} onChange={handleChange} name="aprobacion" required>
+                <option value="">Aprobación: </option>
+                <option value="Fernando Mauricio Yara">Fernando Mauricio Yara</option>
+                <option value="Carolina Herran">Carolina Herran</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Fecha de entrega</label>
+              <input type="date" className="form-control imputs-generar" value={fechaEntrega} onChange={handleChange} required name="fechaEntrega" />
+            </div>
+            <div className="btn-submit-contenedor mt-5">
+              <button id="btn-generar-agregar-forms" type="button" className="btn btn-enviar btn-lg float-end"
+                onClick={handleSubmit} disabled={loading}>
+                { loading ? "Generando reporte" : "Generar" }
+              </button>
+              <button id="btn-volver-agregar-forms" type="button" className="btn btn-volver btn-lg float-start" disabled={loading}>Volver</button>
+            </div>
+          </form>
+          {
+            redirect && <Redirect to="reporte generado" />
+          }
+        </section>
+      </div>
+    )
+  }
+</script>
+
+
+
+
+
+////////////////////////////////////////////////DATA///////////////////////////////
+
+const ID_SHEET_REPORTES = "1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs"
+const REPORTES = "REPORTES"
+const ID_FOLDER_MASTER = "1jIVCrHoRkgv7os3_FcEPHhEmRu3SrSNc"
+const ID_PLANTILLA = "1buymyTPZQK7SeIkTq1mqwKBerGtem0LbCUn36cRazCA"
+
+const buscarSocios = (nombreSocio) => {
+  var sheet = SpreadsheetApp.openById(ID_SHEET_REPORTES)
+  var sheetRespuestas = sheet.getSheetByName(REPORTES)
+  var socios = sheetRespuestas.getDataRange().getDisplayValues()
+  var listSocios = [];
+
+  socios.forEach(item => {
+    var socio = {}
+    socio['campo'] = item[0]
+    socio['reporte'] = item[6]
+    socio['socio'] = item[4]
+    listSocios.push(socio)
+  })
+
+  listSocios = listSocios.filter(item => item.socio == nombreSocio);
+  console.log("socios", listSocios)
+  return (listSocios);
+}
+
+const buscarLinks = (campo) => {
+  // const listLinks = []
+  // const sheet = SpreadsheetApp.openById(ID_SHEET_REPORTES)
+  // const sheetRespuestas = sheet.getSheetByName(REPORTES)
+  // const links = sheetRespuestas.getDataRange().getDisplayValues()
+
+  // links.forEach(item => {
+  //   console.log(item[0])
+  //   if (item[0] === campo){
+  //     listLinks.push(item);
+  //   }
+  // })
+
+  // console.log("links",listLinks);
+  // return (listLinks);
+  const folderMaster = "1jIVCrHoRkgv7os3_FcEPHhEmRu3SrSNc"
+
+}
+
+const crearCopia = (copiaCarpeta) => {
+  const file = DriveApp.getFileById("1buymyTPZQK7SeIkTq1mqwKBerGtem0LbCUn36cRazCA");
+  const nameFile = file.getName();
+  const new_file = file.makeCopy("prueba", copiaCarpeta);
+  const url = new_file.getUrl()
+  console.log("Id anexos ", url);
+  return url
+}
+
+const saveLinksPlantillas = (nombreSocio, campo, tipoReporte) => {
+  try {
+    let listLinks = [];
+    const sheet = SpreadsheetApp.openById(ID_SHEET_REPORTES);
+    const sheetRespuestas = sheet.getSheetByName(REPORTES);
+
+    let links = sheetRespuestas.getDataRange().getDisplayValues();
+
+    links.forEach(item => {
+      if (item[0] === campo && item[6] === tipoReporte && item[4] === nombreSocio) {
+        listLinks = item;
+      }
+    })
+
+    listLinks = listLinks.slice(7)
+
+    const folder_inicial = DriveApp.getFolderById(ID_FOLDER_MASTER);
+    const folders_internos = folder_inicial.getFolders();
+    
+    while (folders_internos.hasNext()) {
+      console.log(folders_internos.hasNext());
+      let folder = folders_internos.next();
+      if (nombreSocio.indexOf(folder.getName()) != -1) {
+        let anexos_internos = DriveApp.getFolderById(folder.getId());
+        let copiaCarpeta = anexos_internos.createFolder("Usuario Sebastian")
+        //const newData = listLinks.filter(item => item !=="N/A")
+        //const itemID = getIdFromURL(item);
+        return crearCopia(copiaCarpeta);
+        // newData.forEach((item) => {
+        // })
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+function getIdFromURL(item) {
+  const urlId = item.split("/")
+  return urlId[5];
+}
+
+const saveDataSpreedsheet = (data) => {
+  const ss = SpreadsheetApp.openById(ID_SHEET_REPORTES);
+  const sheet = ss.getSheetByName("Datos Almacenados");
+  const lastRow = sheet.getLastRow() + 1;
+  const {
+    nombreSocio,
+    campo,
+    tipoReporte,
+    fecha,
+    generadorReporte,
+    revisor,
+    aprobacion,
+    fechaEntrega,
+    fechaMes,
+    forms
+  } = data;
+
+  const dataSave = [
+    nombreSocio,
+    campo,
+    tipoReporte,
+    fecha,
+    generadorReporte,
+    revisor,
+    aprobacion,
+    fechaEntrega,
+    fechaMes,
+    forms
+  ];
+  dataSave.forEach((item, i) => {
+    sheet.getRange(lastRow, i + 1).setValue(item);
+  });
+}
+
+const showError = (error) => {
+  console.log(error);
+}
+
+useEffect(() => {
+      google.script.run.withSuccessHandler(() => {}).generarPlantilla()
+    }, [])
+
+
+const crearCopia = (copiaCarpeta) => {
+  const file = DriveApp.getFileById("1buymyTPZQK7SeIkTq1mqwKBerGtem0LbCUn36cRazCA");
+  const nameFile = file.getName();
+  const new_file = file.makeCopy("prueba", copiaCarpeta);
+  const url = new_file.getUrl()
+  console.log("Id anexos ", url);
+  return url
+}
+save links plantillas
+while (folders_internos.hasNext()) {
+      console.log(folders_internos.hasNext());
+      let folder = folders_internos.next();
+      if (nombreSocio.indexOf(folder.getName()) != -1) {
+        let anexos_internos = DriveApp.getFolderById(folder.getId());
+        let copiaCarpeta = anexos_internos.createFolder("Usuario Sebastian")
+        //const newData = listLinks.filter(item => item !=="N/A")
+        //const itemID = getIdFromURL(item);
+        return crearCopia(copiaCarpeta);
+        // newDa
+
+
+
+
+const handleGetLinks = (resp) => {
+      if(!resp) return
+      const finalData = {...state, forms: resp}
+      google.script.run.withSuccessHandler(redirectToReporte).saveDataSpreedsheet(finalData)
+        //google.script.run.withSuccessHandler(linksData).buscarLinks(campo)
+    }
+
+
+/////////////////////////////////////////////////////////////////////////////
+const linksData = (data) => {
+      if(!data) return
+      if(data[0]){
+        const newData = []
+        let contador = 0
+        data[0].forEach((item, i) => {
+          if(i >= 7){
+            newData[contador] = item
+            contador += 1
+          }
+        })
+        const finalData = {...state, forms: [...newData]}
+        google.script.run.withSuccessHandler(redirectToReporte).saveDataSpreedsheet(finalData)
+      }
+    }
+
+
+https://docs.google.com/spreadsheets/d/1CbPnT3bOXERBoil0Ro4PC_Lcqtizu_WYgT_tGLTKmqE/edit#gid=277469961 --->link copia
+
+columna AS	columna AU	columna AV	columna S	columna S	columna AW	columna AW	columna T	columna T	columna AX	columna AX

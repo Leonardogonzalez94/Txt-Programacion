@@ -1,0 +1,558 @@
+
+    btnGenerarFormSo.addEventListener('click',function(event) {
+      event.preventDefault();
+      formGenerar.setAttribute('hidden', '');
+      sectionVista.removeAttribute('hidden');
+    });
+
+  btnGenerarFormSo.addEventListener('click',function(event) {
+      event.preventDefault();
+      formGenerar.setAttribute('hidden', '');
+      sectionVista.removeAttribute('hidden');
+    });
+
+
+--------------------------------------------------------------------------------
+
+function buscarRegistro() {
+
+      var nombreSocio = document.getElementById("nombreSocio").value;
+      var Campo = document.getElementById("campo").value;
+      var tipoReporte = document.getElementById("tipoReporte").value;
+     
+
+      google.script.run
+         .withSuccessHandler(changeOptionsCampo)
+
+         .withFailureHandler(showError)
+         .buscarSocios(nombreSocio);
+
+   }
+
+
+   function changeOptionsCampo(data) {
+
+      var selectList = document.querySelector("#campo");
+      var selectListReport = document.querySelector("#tipoReporte");
+      selectList.options.length = 0;
+      selectListReport.options.length = 0;
+      for (let item of data) {
+         var option = document.createElement("option");
+         var option1 = document.createElement("option");
+         option.value = item.campo;
+         option.innerHTML = item.campo;
+         option1.value = item.reporte;
+         option1.innerHTML = item.reporte;
+         selectList.appendChild(option);
+         selectListReport.appendChild(option1);
+
+
+         // var elems_sel = document.querySelectorAll('select');
+         //var instances_sel = M.FormSelect.init(elems_sel);
+
+      }
+   }
+
+----------------------------------codigo--------------------------
+  function buscarSocios(nombreSocio) {
+    
+    var sheet = SpreadsheetApp.openById("1DSD8WqwPFPMZxdEMeagFLEfxX2itnMjCGksJC0ZkueM");
+    var sheetRespuestas = sheet.getSheetByName("Base Datos");
+    var socios = sheetRespuestas.getDataRange().getDisplayValues();
+    var listSocios= [];
+    
+  
+    socios.forEach(item => {
+      var socio = {}
+      socio['campo']=item[0]
+      socio['reporte']=item[1]
+      socio['socio']=item[2]
+      listSocios.push(socio)
+      
+      
+  
+    })
+    
+    listSocios=listSocios.filter(item => item.socio== nombreSocio)
+  
+    console.log("socios", listSocios)
+    return(listSocios);
+  
+  }
+      
+  
+    --------------------------------------------------------
+function getSheetData(){
+    var sheet = SpreadsheetApp.openById("1DSD8WqwPFPMZxdEMeagFLEfxX2itnMjCGksJC0ZkueM");
+    var sheetPlantillas = sheet.getSheetByName("Base Datos");
+    var dataPlantillas = sheetPlantillas.getDataRange().getDisplayValues();
+    dataPlantillas.shift();
+    
+    dataPlantillas.forEach( plantilla=>{
+    plantilla[4] = plantilla[3].replace(/.*\/d\//,'').replace(/.*\/d\//,'');
+    //console.log(plantilla [4]);
+   
+    });
+      return dataPlantillas;
+  }
+
+
+ btnGenerarFormSo.addEventListener('click',function(event) {
+      event.preventDefault();
+      formGenerar.setAttribute('hidden', '');
+      sectionReporte.removeAttribute('hidden');
+    });
+
+id="btn-generar-agregar-forms"
+
+
+function buscarRegistro() {
+
+      var nombreSocio = document.getElementById("nombreSocio").value;
+      var Campo = document.getElementById("campo").value;
+      var tipoReporte = document.getElementById("tipoReporte").value;
+
+
+      google.script.run
+         .withSuccessHandler(info => {
+            let tableBody = document.getElementById("reportesTablaBody");
+            tableBody.innerHTML = "";
+            if (info.lenght > 0) {
+               infoCampo.value = info[0][1];
+               infotipoReporte.value = info[0][2];
+
+               info.forEach(reporte => {
+               const template= document.getElementById("reportesRow");
+               const templateRow=template.content;
+               let tr= templateRow.cloneNode(true);
+               let colConsolidado=tr.querySelector(".reporteConsolidado");
+               let colCarta=tr.querySelector(".reporteCarta");
+               let colRendimiento=tr.querySelector(".reporteRendimientos");
+               let colEjecucion=tr.querySelector(".reporteEjecucion");
+
+               colConsolidado= textContent=reporte[3];
+               colCarta= reporte[4];
+               colRendimiento= reporte[5];
+               colEjecucion= reporte[6];
+
+               tableBody.appendChild(tr)
+
+               })
+
+            }
+
+         })
+         .buscarSocios(nombreSocio);
+         console.log(nombreSocio);
+   }
+
+
+function buscarSocios(nombreSocio) {
+    
+    var sheet = SpreadsheetApp.openById("1DSD8WqwPFPMZxdEMeagFLEfxX2itnMjCGksJC0ZkueM");
+    var sheetRespuestas = sheet.getSheetByName("Base Datos");
+    var socios = sheetRespuestas.getDataRange().getDisplayValues();
+    var listSocios= [];
+    
+  
+    socios.forEach(item => {
+     if(item[0] ===nombreSocio){
+       listSocios.push(item);
+     }
+    })
+    //console.log(listSocios);
+    return(listSocios);
+  }
+
+
+----------------------------------------------------
+<table id="reportesTable" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Consolidados saldos</th>
+        <th>Carta Español</th>
+        <th>Rendimientos Financieros</th>
+        <th>Ejecucion Presupuestal</th>
+      </tr>
+    </thead>
+    <tbody id="reportesTablaBody">
+      <!----se inserta info tablas -->
+  
+  
+    </tbody>
+  </table>
+  
+  
+  <template id="reportesRow">
+    <tr>
+      <td class="reporteConsolidado"> </td>
+      <td class="reporteCarta"> </td>
+      <td class="reporteRendimientos"> </td>
+      <td class="reporteEjecucion"> </td>
+    </tr>
+  </template>
+
+
+ <div class="col-3">
+        <input type="text" class="form-control" id="text-box-numeroSocio"
+         placeholder="No.Socio" aria-label="First-name">
+      </div>
+
+
+
+////////////////////(///////////////////////////////////////
+
+function buscarLinks(nombreSocio) {
+
+  var listLinks = [];
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("REPORTES");
+  var links = sheetRespuestas.getDataRange().getDisplayValues();
+
+
+
+  links.forEach(item => {
+    if (item[4] === nombreSocio) {
+      listLinks.push(item);
+    }
+  })
+  //console.log(listSocios);
+  return (listLinks);
+}
+
+
+function saveLinksPlantillas() {
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("links folders");
+  var rango=sheetRespuestas.getRange("C2:C28").getValues();
+  ///COREGIR rango
+
+  //var lastRow_sheetConsulta = sheetRespuestas.getLastRow();
+  //var rango = sheetRespuestas.getRange("C2" + lastRow_sheetConsulta).getValues();
+ 
+  let folder = DriveApp.getFolderById("16dh3x_uIVZEyOeOcbYaWDa5hV3xFD_Bf");
+  Logger.log(rango);
+
+  for (let item of rango) {
+  var itemID = getIdFrom(item);
+  crearCopia(itemID);
+}
+
+}
+function getIdFrom(url) {
+  console.log(url[0]);
+  var id = url[0].match(/\/d\/(.+)\//)
+  console.log(id);
+  return id[1];
+
+}
+
+function buscarSocios(nombreSocio) {
+
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("REPORTES");
+  var socios = sheetRespuestas.getDataRange().getDisplayValues();
+  var listSocios = [];
+
+
+  socios.forEach(item => {
+    var socio = {}
+    socio['campo'] = item[0]
+    socio['reporte'] = item[6]
+    socio['socio'] = item[4]
+    listSocios.push(socio)
+
+
+
+
+  })
+
+  listSocios = listSocios.filter(item => item.socio == nombreSocio)
+
+  //console.log("socios", listSocios)
+  return (listSocios);
+
+}
+
+
+background: #63666A;;
+
+
+///////////////////////////////////////funcion folder y file/////////////
+function myFunction() {
+  const user = Session.getActiveUser().getEmail();
+  const fecha = Utilities.formatDate(new Date(), "GMT -0500", "dd/MM/yyyy");
+  const folder_inicial = DriveApp.getFolderById("1npjMXH0qH5ure6-sqD-zYU7AFPNJfCIS");
+  const folders_internos = folder_inicial.getFolders();
+  console.log("Folders ", folders_internos);
+  let socio = "Client1";
+  let id_folder_socio = "";
+  let anexos = ["Anexo1", "Anexo3"];
+  while(folders_internos.hasNext()){
+    let folder = folders_internos.next();
+    if(folder.getName() == socio){
+      id_folder_socio = folder.getId();
+    }
+  }
+  const folder_socio = DriveApp.getFolderById(id_folder_socio);
+  const folders_internos_socio = folder_socio.getFolders();
+  let urls_copy = [];
+  while(folders_internos_socio.hasNext()){
+    let folder = folders_internos_socio.next();
+    if(anexos.indexOf(folder.getName()) != -1){
+      //Generación de copia del archivo y almacenamiento
+      let file = DriveApp.getFileById("1HCkbKI-efMbaXfewsCZ7M801v_ZATMtCl3g97QFdD6w");
+      let folder_anexo_copia = DriveApp.getFolderById(folder.getId());
+      let new_file = file.makeCopy(file.getName() + " " + user + " " + fecha, folder_anexo_copia);
+      urls_copy.push(new_file.getUrl());
+    }
+  }
+
+  console.log("Id anexos ", urls_copy);
+  return urls_copy
+}
+
+
+
+function enviarDatos(datos) {
+  const sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  const sheetRespuestas = sheet.getSheetByName("Datos almacenados");
+  const lastRow = sheetRespuestas.getLastRow() + 1;
+  let i = 1;
+
+  const {
+    nombreSocio,
+    campo,
+    tipoReporte,
+    anoMes,
+    fecha,
+    generador_reporte,
+    revision,
+    aprobacion,
+    fecha_entrega,
+  } = datos;
+
+  const id = newDate();
+  const data = [
+    id,
+    nombreSocio,
+    campo,
+    tipoReporte,
+    anoMes,
+    fecha,
+    generador_reporte,
+    revision,
+    aprobacion,
+    fecha_entrega,
+  ];
+
+
+  data.forEach((dato) => {
+    sheet.getRange(lastRow, i).setValue(dato);
+    i++;
+  });
+  console.log("Se creo solicitud");
+//sheetRespuestas.appendRow([id, nombre_socio, campo, tipo_reporte,ano_mes, fecha, generador_reporte, revision, aprobacion, fecha_entrega]);
+//return HtmlService.createTemplateFromFile("Forms/ReservaGenerado").evaluate();
+}
+
+////////////////////////////////////////////////////////////
+funcion buscar links
+
+function buscarLinks(Campo) {
+
+  var listLinks = [];
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("REPORTES"); 
+  var links = sheetRespuestas.getDataRange().getDisplayValues();
+
+
+
+  links.forEach(item => {
+    if (item[0] === Campo) {
+      listLinks.push(item);
+    }
+  })
+  //console.log(listSocios);
+  return (listLinks);
+}
+
+
+/////////////////////////////////function buscarLinks///////////////////////////////////////////
+
+function buscarLinks(nombreSocio, campo, tipoReporte) {
+  
+  var listLinks = [];
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("REPORTES"); 
+  var links = sheetRespuestas.getDataRange().getDisplayValues();
+  
+
+
+  links.forEach(item => {
+    var socio = {}
+    socio['campo'] = item[0]
+    socio['reporte'] = item[6]
+    socio['socio'] = item[4]
+    listLinks.push(socio)
+    
+  })
+
+  listLinks = listLinks.filter(item => item.socio == nombreSocio && item.socio ==campo && item.socio ==tipoReporte);
+
+  const user = Session.getActiveUser().getEmail();
+  const fecha = Utilities.formatDate(new Date(), "GMT -0500", "dd/MM/yyyy");
+  const folder_inicial = DriveApp.getFolderById("1jIVCrHoRkgv7os3_FcEPHhEmRu3SrSNc");
+  const folders_internos = folder_inicial.getFolders();
+  console.log("Folders ", folders_internos);
+
+  let socio = nombreSocio;
+  let id_folder_socio = "";
+  let anexos = ["CONCILIACION", "CARTA ESP/ING"];  //encabezados
+  while (folders_internos.hasNext()) {
+    let folder = folders_internos.next();
+    if (folder.getName() == socio) {
+      id_folder_socio = folder.getId();
+    }
+
+  }
+  //console.log("id_folder_socio ", id_folder_socio);
+  const folder_socio = DriveApp.getFolderById(id_folder_socio);
+  const folders_internos_socio = folder_socio.getFolders();
+  //let id_folders_anexos=[];
+  let urls_copy = [];
+  while(folders_internos_socio.hasNext()){
+    let folder = folders_internos_socio.next();
+    if(anexos.indexOf(folder.getName()) != -1){
+
+      var posicion=anexos.indexOf(folder.getName())
+      var idLink=getIdFrom(listLinks[posicion])
+
+      //id_folders_anexos.push(folder.getId());
+      let file = DriveApp.getFileById(idLink);
+      let folder_anexo_copia = DriveApp.getFolderById(folder.getId());
+      let new_file = file.makeCopy(file.getName() + " " + user + " " + fecha, folder_anexo_copia);
+      urls_copy.push(new_file.getUrl());
+    }
+  }
+  //console.log(listSocios);
+  return (urls_copy);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+
+const user = Session.getActiveUser().getEmail();
+  const fecha = Utilities.formatDate(new Date(), "GMT -0500", "dd/MM/yyyy");
+  const folder_inicial = DriveApp.getFolderById("1jIVCrHoRkgv7os3_FcEPHhEmRu3SrSNc");
+  const folders_internos = folder_inicial.getFolders();
+  //console.log("Folders ", folders_internos);
+
+  let socio = nombreSocio;
+  let id_folder_socio = "";
+  let anexos = ["CONCILIACION", "CARTA ESP/ING"];  //encabezados
+  while (folders_internos.hasNext()) {
+    let folder = folders_internos.next();
+    if (folder.getName() == socio) {
+      id_folder_socio = folder.getId();
+    }
+
+  }
+  //console.log("id_folder_socio ", id_folder_socio);
+  const folder_socio = DriveApp.getFolderById(id_folder_socio);
+  const folders_internos_socio = folder_socio.getFolders();
+  //let id_folders_anexos=[];
+  let urls_copy = [];
+  while (folders_internos_socio.hasNext()) {
+    let folder = folders_internos_socio.next();
+    if (anexos.indexOf(folder.getName()) != -1) {
+
+      var posicion = anexos.indexOf(folder.getName())
+      var idLink = getIdFrom(listLinks[posicion])
+
+      //id_folders_anexos.push(folder.getId());
+      let file = DriveApp.getFileById(idLink);
+      let folder_anexo_copia = DriveApp.getFolderById(folder.getId());
+      let new_file = file.makeCopy(file.getName() + " " + user + " " + fecha, folder_anexo_copia);
+      urls_copy.push(new_file.getUrl());
+    }
+  }
+  //console.log(listSocios);
+  return (urls_copy);
+
+
+
+////////////////////////////////////////////////////////////////////codigo buscar links////////////////////////
+
+function buscarLinksSocioss(nombreSocio="PERENCO", campo="CR-1", tipoReporte="OPERADO-EXPLORATORIO") {
+  
+  var listLinks = [];
+  var sheet = SpreadsheetApp.openById("1g2HZbvzNixzxKOhidCb_iM-uw-QQ1QxyoCYy6A757Gs");
+  var sheetRespuestas = sheet.getSheetByName("REPORTES"); 
+  var links = sheetRespuestas.getDataRange().getDisplayValues();
+  
+
+
+  links.forEach(item => {
+    if (item[0] === campo && item[6] === tipoReporte && item[4] === nombreSocio) {
+     listLinks=item;
+    }
+  })
+
+//listLinks = listLinks.filter(item => item.socio == nombreSocio && item.campo ==campo && item.reporte ==tipoReporte);
+listLinks = listLinks.slice(7)
+
+
+  const user = Session.getActiveUser().getEmail();
+  const fecha = Utilities.formatDate(new Date(), "GMT -0500", "dd/MM/yyyy");
+  const folder_inicial = DriveApp.getFolderById("1jIVCrHoRkgv7os3_FcEPHhEmRu3SrSNc");
+  const folders_internos = folder_inicial.getFolders();
+  console.log("Folders ", folders_internos);
+
+  let socio = nombreSocio;
+  let id_folder_socio = "";
+  let anexos = buscarFolderSocio() // encabezados
+  while (folders_internos.hasNext()) {
+    let folder = folders_internos.next();
+    if (folder.getName() == socio) {
+     
+      id_folder_socio = folder.getId();
+    
+    }
+
+  }
+  //console.log("id_folder_socio ", id_folder_socio);
+  const folder_socio = DriveApp.getFolderById(id_folder_socio);
+  const folders_internos_socio = folder_socio.getFolders();
+  //let id_folders_anexos=[];
+  let urls_copy = [];
+  while(folders_internos_socio.hasNext()){
+    let folder = folders_internos_socio.next();
+   
+       
+    if(anexos.indexOf(folder.getName()) != -1){
+
+      var posicion=anexos.indexOf(folder.getName())
+      console.log(posicion)
+      console.log(folder.getName())
+      console.log(listLinks[posicion])
+
+
+      if(listLinks[posicion] != "N/A"){
+
+      var idLink=getIdFrom(listLinks[posicion])
+
+      //id_folders_anexos.push(folder.getId());
+      let file = DriveApp.getFileById(idLink);
+      let folder_anexo_copia = DriveApp.getFolderById(folder.getId());
+      let new_file = file.makeCopy(file.getName() + " " + user + " " + fecha, folder_anexo_copia);
+      urls_copy.push(new_file.getUrl());
+      }
+    }
+  }
+  //console.log(listSocios);
+  return (urls_copy);
+}
+  

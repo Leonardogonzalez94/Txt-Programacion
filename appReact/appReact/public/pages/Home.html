@@ -1,0 +1,42 @@
+
+<script type="text/jsx">
+
+function Home() {
+
+    const [form,setForm] = React.useState({});
+
+  
+    const handleChange = (e) =>{
+        setForm({
+            ...form,
+            [e.target.name]:e.target.value
+        })
+    }
+
+    const handleSubmit = (e) =>{
+       e.preventDefault();
+       google.script.run.withSuccessHandler(res =>{
+            
+    }).saveGoogle(form)
+       alert("Formulario Enviado");
+    }
+
+    return (
+        <div>
+       <h1>Esta es la pagina Home</h1>
+
+       <form onSubmit = {handleSubmit}>
+           <div class="row card">
+           <input type="text" placeholder="Ingrese Nombre" name="name" onChange={handleChange} />
+           <input type="number" placeholder="Ingrese Telefono" name="phone" onChange={handleChange} />
+        </div>
+           <button type="submit">Llamar a GAS</button> 
+       </form>
+
+     
+      
+    </div>
+    );
+};
+
+</script>

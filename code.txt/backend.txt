@@ -1,0 +1,192 @@
+getProducts(page: number = 0, size: number = 10, sort: string = 'name', order: 'asc' | 'desc' | '' = 'asc', search: string = ''):
+        Observable<{ pagination: RolPagination; products: RolRoles[] }>
+    {
+        return this._httpClient.get<{ pagination: RolPagination; products: RolRoles[] }>('api/apps/roles/products', {
+            params: {
+                page: '' + page,
+                size: '' + size,
+                sort,
+                order,
+                search
+            }
+        }).pipe(
+            tap((response) => {
+                this._pagination.next(response.pagination);
+                this._products.next(response.products);
+            })
+        );
+    }
+
+
+
+    /**
+     * Get product by id
+     */
+    getProductById(id: string): Observable<RolRoles>
+    {
+        return this._products.pipe(
+            take(1),
+            map((products) => {
+
+                // Find the product
+                const product = products.find(item => item.id === id) || null;
+
+                // Update the product
+                this._product.next(product);
+
+                // Return the product
+                return product;
+            }),
+            switchMap((product) => {
+
+                if ( !product )
+                {
+                    return throwError('Could not found product with id of ' + id + '!');
+                }
+
+                return of(product);
+            })
+        );
+    }
+
+
+     this._roleService.getListRol().subscribe(res=> console.log(res));
+        console.log("entro  tabla roles");
+
+
+{
+    "name": "leonardo",
+    "level": [{
+        "id":1 
+    },
+       {
+           "id":2
+       }
+    ]
+
+}
+
+
+1		{"icon": "view_comfy", "type": "link", "label": "Gestión de roles", "route": "/roles"}	F	1
+2		{"icon": "view_comfy", "type": "link", "label": "Gestión de usuarios", "route": "/users"}	F	1
+3		{"icon": "view_comfy", "type": "link", "label": "Gestión de contenidos", "route": "/contents"}	F	1
+4		{"icon": "view_comfy", "type": "link", "label": "Administración de segmentos", "route": "/roles"}	F	1
+5		{"icon": "view_comfy", "type": "link", "label": "Administración de cajas de categorías", "route": "
+
+
+
+getListRol(){
+        console.log("entra a rol services")
+        return this._httpClient.get<ApiResponseCustom>( `${environment.URL_BACKEND}/role`)
+        .pipe(
+            map(response =>{
+                console.log(response);
+            } ))
+    }
+
+
+getListRol(){
+        console.log("entra a rol services")
+        return this._httpClient.get<ApiResponseCustom>( `${environment.URL_BACKEND}/role`)
+        .pipe(
+            map(response =>{
+                console.log(response);
+            } ))
+    }
+    
+    getIdRol(){
+        console.log("entra a id Rol")
+        return this._httpClient.get<ApiResponseCustom>( `${environment.URL_BACKEND}/role/id`)
+        .pipe(
+            map(response =>{
+                console.log(response);
+            } ))   
+
+    }
+
+
+getIdRols(id:number){
+        console.log("entra a rol services")
+        return this._httpClient.get<ApiResponseCustom>( `${environment.URL_BACKEND}/role/${id}`)
+        .pipe(
+            map(response =>{
+                return response.data;
+            } ))
+    }
+
+
+createRol(): void {
+        this._rolService.createRol()((rol) => {
+                //console.log(res);
+                this.selectedProduct=(rol);
+                this.selectedRoleForm.patchValue(rol);
+                this._changeDetectorRef.markForCheck();
+            });
+    }
+  
+
+
+ createRol()
+ {
+     console.log("entra a rol services3")
+     this._httpClient.post<ApiResponseCustom>(`${environment.URL_BACKEND}/role`,{ 
+        "name": "prueba10",
+        "active": false,
+        "level": [
+            {
+                "id": 3
+            },
+            {
+                "id": 4
+            }
+        ]
+     }).subscribe((res) =>{ console.log(res.data[0].log)})
+ }
+
+getIdRols(id: number) {
+        console.log("entra a rol services")
+        return this._httpClient.get<ApiResponseCustom>(`${environment.URL_BACKEND}/role/${id}`)
+            .pipe(
+                map(response => {
+                    return response.data;
+                }))
+    }
+
+
+
+
+        this._rolService.getIdRols(productId)
+            .subscribe(rol => {
+                console.log(rol);
+                this.selectedProduct = rol;
+                this.selectedRoleForm.patchValue(rol);
+            })
+
+
+
+ addRol(): Observable<Rol>
+    {   const newRol = {
+            id:0,
+            name:'',
+            log:{createdAt:new Date().toString()},
+            level:[]
+        }
+        return this.products$.pipe{
+           take(1),
+           map(roles =>{
+            this._products.next([newRol, ...roles]);
+            return newRol;
+           })
+
+        };
+    }
+
+
+  /*createRol( rol:Rol) {
+        console.log("entra a create rol")
+        return this._httpClient.post<ApiResponseCustom>(`${environment.URL_BACKEND}/role`,rol).pipe(
+                map((res) => {
+                   return (res.data);
+                }) 
+            );   
+    }
